@@ -1,7 +1,10 @@
 import requests
 import random
 import string
+from datetime import datetime
 from url import COURIER_CREATE_URL
+
+
 
 
 # метод генерирует строку, состоящую только из букв нижнего регистра, в качестве параметра передаём длину строки
@@ -42,6 +45,23 @@ def register_new_courier_and_return_login_password():
     # возвращаем список
     return login_pass
 
+
+def generate_phone():
+    digits = ''.join(random.choices(string.digits, k=10))
+    return f"+7 {digits[0:3]} {digits[3:6]} {digits[6:8]} {digits[8:10]}"
+
+
+def generate_address():
+    streets = [
+        "Lenina", "Pushkina", "Gorkogo", "Sovetskaya"
+    ]
+    street = random.choice(streets)
+    apt = random.randint(1, 300)
+    return f"{street} St., {apt} apt."
+
+def get_today_date():
+    
+    return datetime.now().strftime("%Y-%m-%d")
 
 
 
