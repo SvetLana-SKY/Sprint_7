@@ -36,3 +36,9 @@ class TestCreateOrder:
 
         assert response.status_code == 201
         assert "track" in response.json()
+
+        data = response.json()
+        assert "track" in data
+        track = data["track"]
+
+        requests.delete(f"{ORDER_CREATE_URL.rstrip('/')}/{track}")

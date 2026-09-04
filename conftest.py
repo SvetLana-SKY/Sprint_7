@@ -23,3 +23,5 @@ def created_courier():
     if login_response.status_code == 200 and "id" in login_response.json():
         courier_id = login_response.json()["id"]
         requests.delete(f"{COURIER_CREATE_URL}/{courier_id}")
+
+
