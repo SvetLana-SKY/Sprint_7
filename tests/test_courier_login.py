@@ -2,7 +2,7 @@ import requests
 import allure
 from helpers import generate_random_string
 from url import COURIER_LOGIN_URL
-
+from data import Messages
 
 class TestLoginCourier:
 
@@ -14,10 +14,11 @@ class TestLoginCourier:
             "login": login,
             "password": password
         }
-        response = requests.post(COURIER_LOGIN_URL, data=payload)
+        with allure.step("Логин курьера"):
+            response = requests.post(COURIER_LOGIN_URL, data=payload)
 
-        assert response.status_code == 200
-        assert "id" in response.json()
+            assert response.status_code == 200
+            assert "id" in response.json()
 
 
 
@@ -26,10 +27,12 @@ class TestLoginCourier:
         login, password, first_name = created_courier
 
         payload = {'password': password}
-        response = requests.post(COURIER_LOGIN_URL, data=payload)
 
-        assert response.status_code == 400
-        assert response.json() == {'message': "Недостаточно данных для входа"}
+        with allure.step("Логин курьера без логина"):
+            response = requests.post(COURIER_LOGIN_URL, data=payload)
+
+            assert response.status_code == 400
+            assert response.json() == Messages.LOGIN_DATA_MISSING
 
                
 
@@ -40,10 +43,12 @@ class TestLoginCourier:
         login, password, first_name = created_courier
 
         payload = {"login": login}
-        response = requests.post(COURIER_LOGIN_URL, data=payload)
 
-        assert response.status_code == 400
-        assert response.json() == {'message': "Недостаточно данных для входа"}
+        with allure.step("Логин курьера без пароля"):
+            response = requests.post(COURIER_LOGIN_URL, data=payload)
+
+            assert response.status_code == 400
+            assert response.json() == Messages.LOGIN_DATA_MISSING
         
     
 
@@ -58,10 +63,12 @@ class TestLoginCourier:
             "login": login,
             "password": wrong_password
         }
-        response = requests.post(COURIER_LOGIN_URL, data=payload)
 
-        assert response.status_code == 404
-        assert response.json() == {'message': "Учетная запись не найдена"}
+        with allure.step("Логин курьера с неверным паролем"):
+            response = requests.post(COURIER_LOGIN_URL, data=payload)
+
+            assert response.status_code == 404
+            assert response.json() == Messages.USER_NOT_FOUND
         
 
        
@@ -76,7 +83,9 @@ class TestLoginCourier:
                "login": login + 'm',
                "password": password
            }
-        response = requests.post(COURIER_LOGIN_URL, data=payload)
-   
-        assert response.status_code == 404
-        assert response.json() == {'message': "Учетная запись не найдена"}
+
+        with allure.step("Логин курьера с неверным логином"):
+            response = requests.post(COURIER_LOGIN_URL, data=payload)
+    
+            assert response.status_code == 404
+            assert response.json() == Messages.USER_NOT_FOUND

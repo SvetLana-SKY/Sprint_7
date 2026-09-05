@@ -1,8 +1,8 @@
 import requests
 import allure
-from helpers import register_new_courier_and_return_login_password, generate_random_string
+from helpers import generate_random_string
 from url import COURIER_CREATE_URL, COURIER_LOGIN_URL
-
+from data import Messages
 
 class TestCreateCourier:
 
@@ -17,17 +17,19 @@ class TestCreateCourier:
             'password': password,
             'firstName': first_name
         }
+        
+        with allure.step("создаем курьера"):
+            response = requests.post(COURIER_CREATE_URL, data=payload)
+            assert response.status_code == 201
+            assert response.json() == Messages.SUCCESSFUL_REGISTRATION
 
-        response = requests.post(COURIER_CREATE_URL, data=payload)
-        assert response.status_code == 201
-        assert response.json() == {"ok": True}
-
-        login_response = requests.post(COURIER_LOGIN_URL, json={
-                "login": login,
-                "password": password
-            })
-        assert login_response.status_code == 200
-        courier_id = login_response.json()["id"]
+        with allure.step("получаем данные, для удаления курьера"):
+            login_response = requests.post(COURIER_LOGIN_URL, json={
+                    "login": login,
+                    "password": password
+                })
+            assert login_response.status_code == 200
+            courier_id = login_response.json()["id"]
 
 
         with allure.step("Удаление созданного курьера"):
@@ -44,11 +46,12 @@ class TestCreateCourier:
         "password": password,
         "firstName": first_name
     }
-        response = requests.post(COURIER_CREATE_URL, data=payload)
+        with allure.step("создаем дубликат курьера"):
+            response = requests.post(COURIER_CREATE_URL, data=payload)
 
 
-        assert response.status_code == 409
-        assert response.json() == {'message': 'Этот логин уже используется'}
+            assert response.status_code == 409
+            assert response.json() == Messages.DUPLICATE_LOGIN
 
 
     @allure.title('Создание курьера без логина')
@@ -60,10 +63,11 @@ class TestCreateCourier:
             "password": password,
             "firstName": first_name
         }
+        with allure.step("Регистрируемся без логина"):
+            response = requests.post(COURIER_CREATE_URL, data=payload)
 
-        response = requests.post(COURIER_CREATE_URL, data=payload)
-        assert response.status_code == 400
-        assert response.json() == {"message": "Недостаточно данных для создания учетной записи"}
+            assert response.status_code == 400
+            assert response.json() == Messages.REGISTRATION_DATA_MISSING
 
 
 
@@ -72,9 +76,10 @@ class TestCreateCourier:
         payload = {'login': generate_random_string(8),
                 'firstName': generate_random_string(8)}
 
-        response = requests.post(COURIER_CREATE_URL, data=payload)
-        assert response.status_code == 400
-        assert response.json() == {"message": "Недостаточно данных для создания учетной записи"}
+        with allure.step("Регистрируемся без пароля"):
+            response = requests.post(COURIER_CREATE_URL, data=payload)
+            assert response.status_code == 400
+            assert response.json() == Messages.REGISTRATION_DATA_MISSING
 
 
 
@@ -87,8 +92,9 @@ class TestCreateCourier:
         "password": generate_random_string(6),
         "firstName": generate_random_string(8)
     }
-        response = requests.post(COURIER_CREATE_URL, data=payload)
 
+        with allure.step("Регистрируем с повторным логином"):
+            response = requests.post(COURIER_CREATE_URL, data=payload)
 
-        assert response.status_code == 409
-        assert response.json() == {'message': 'Этот логин уже используется'}            
+            assert response.status_code == 409
+            assert response.json() == Messages.DUPLICATE_LOGIN            

@@ -5,7 +5,7 @@ import allure
 import json
 from url import ORDER_CREATE_URL
 from helpers import generate_random_string, generate_phone, generate_address, get_today_date
-from datetime import datetime
+
 
 
 class TestCreateOrder:
@@ -30,15 +30,19 @@ class TestCreateOrder:
         }
         headers = {"Content-type": "application/json"}
         payload_string = json.dumps(payload)
-        response = requests.post(ORDER_CREATE_URL, data=payload_string, headers=headers)
+
+        with allure.step("Создание заказа с параметризацией по цвету"):
+            response = requests.post(ORDER_CREATE_URL, data=payload_string, headers=headers)
 
 
 
-        assert response.status_code == 201
-        assert "track" in response.json()
+            assert response.status_code == 201
+            assert "track" in response.json()
 
         data = response.json()
         assert "track" in data
         track = data["track"]
 
-        requests.delete(f"{ORDER_CREATE_URL.rstrip('/')}/{track}")
+        with allure.step("Удаление заказа"):
+
+            requests.delete(f"{ORDER_CREATE_URL.rstrip('/')}/{track}")
